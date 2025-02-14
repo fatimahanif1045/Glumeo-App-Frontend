@@ -4,7 +4,8 @@
 
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, StyleSheet } from 'react-native';
-import { logIn, getToken } from '../services/userServices';  // Import the logIn function from userService
+import { logIn, getToken } from '../services/auth'; 
+import LinearGradient from 'react-native-linear-gradient';
 
 const LoginScreen = ({ navigation, setIsAuthenticated }) => {
   const [email, setEmail] = useState('');
@@ -33,6 +34,7 @@ const handleLogin = async () => {
 };
 
   return (
+    <LinearGradient colors={["#ff9a9e", "#fad0c4", "#a18cd1", "#fbc2eb"]} style={styles.container}>
     <View style={styles.container}>
       <Text style={styles.title}>Log In</Text>
       <TextInput
@@ -53,6 +55,7 @@ const handleLogin = async () => {
       <Button title={loading ? 'Logging In...' : 'Log In'} onPress={handleLogin} />
       <Text style={styles.link} onPress={() => navigation.navigate('Signup')}>Don't have an account? Sign up</Text>
     </View>
+    </LinearGradient>
   );
 };
 
@@ -62,6 +65,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  
   input: {
     height: 40,
     borderColor: '#ccc',
@@ -75,6 +79,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    color: 'white',
+fontWeight:'bold',
     textAlign: 'center',
     marginBottom: 20,
   },

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, StyleSheet, Button, Alert, TouchableOpacity } from 'react-native';
 import { getVideos } from '../services/videoService';
-import { logout } from '../services/userServices';  // Import logout function
 
-const HomeScreen = ({ navigation, setIsAuthenticated }) => {
+const HomeScreen = () => {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,7 +11,7 @@ const HomeScreen = ({ navigation, setIsAuthenticated }) => {
     const fetchVideos = async () => {
       try {
         const videosData = await getVideos();
-        console.log('Fetched Videos:', videosData); 
+        //console.log('Fetched Videos:', videosData); 
         setVideos(videosData);
         setLoading(false);
       } catch (error) {
@@ -23,26 +22,6 @@ const HomeScreen = ({ navigation, setIsAuthenticated }) => {
 
     fetchVideos();
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      const data = await logout();
-      Alert.alert('Logged out', 'You have been logged out successfully');
-      
-      if (data.success) {
-        setIsAuthenticated(false);
-        
-        // Reset the navigation stack to the Login screen
-        navigation.reset({
-          index: 0,  // Reset to the first screen
-          routes: [{ name: 'Login' }],
-        });
-      }
-    } catch (error) {
-      console.error('Error logging out:', error);
-      Alert.alert('Logout Failed', 'An error occurred while logging out.');
-    }
-  };
 
   if (loading) {
     return (
@@ -71,7 +50,6 @@ const HomeScreen = ({ navigation, setIsAuthenticated }) => {
 
   return (
     <View style={styles.container}>
-      <Button title="Logout" onPress={handleLogout} />
       <FlatList
         data={videos}
         renderItem={renderVideoItem}

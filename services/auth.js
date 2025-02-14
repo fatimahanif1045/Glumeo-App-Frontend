@@ -1,10 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Base URL of the backend API
-const API_URL = 'http://10.0.2.2:8000/api/user';
+const API_URL = 'http://10.0.2.2:8000/api/user';    // Base URL of the backend API
 
-// Function to store token in AsyncStorage
 export const storeToken = async (token) => {
   try {
     await AsyncStorage.setItem('token', token);  // Store the token
@@ -13,7 +11,6 @@ export const storeToken = async (token) => {
   }
 };
 
-// Function to get token from AsyncStorage
 export const getToken = async () => {
   try {
     const token = await AsyncStorage.getItem('token');  // Retrieve the token
@@ -24,10 +21,9 @@ export const getToken = async () => {
   }
 };
 
-// Function to sign up a user
-export const signUp = async (name, email, password) => {
+export const signUp = async (name, userName, email, password) => {
   try {
-    const response = await axios.post(`${API_URL}/user-signup`, { name, email, password });
+    const response = await axios.post(`${API_URL}/user-signup`, { name, userName, email, password });
     return response.data;
   } catch (error) {
     console.error('Axios error:', error.response ? error.response.data : error.message);
@@ -35,7 +31,6 @@ export const signUp = async (name, email, password) => {
   }
 };
 
-// Function to log in a user
 export const logIn = async (email, password) => {
   try {    
     const response = await axios.post(`${API_URL}/user-login`, { email, password });
@@ -47,7 +42,6 @@ export const logIn = async (email, password) => {
   }
 };
 
-// Function to log out a user
 export const logout = async () => {
   try {
     await AsyncStorage.removeItem('token');  // Clear the token

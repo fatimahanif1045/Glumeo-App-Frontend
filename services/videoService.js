@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from './userServices';  // Import getToken function from userService
+import { getToken } from './auth';  
 
 // Define your backend API URL
 const API_URL = 'http://10.0.2.2:8000/api/user/videos/get-videos';
@@ -27,5 +27,25 @@ export const getVideos = async () => {
     console.error('Error: ', error);
     console.error('Error fetching videos: ', error.response ? error.response.data : error.message);
     throw error;
+  }
+};
+
+
+
+export const searchUsers = async (query) => {
+  try {
+    const response = await axios.get(`${apiUrl}/search`, { params: { query } });
+    return response.data;
+  } catch (error) {
+    throw new Error('Search failed');
+  }
+};
+
+export const uploadContent = async (data) => {
+  try {
+    const response = await axios.post(`${apiUrl}/upload`, data);
+    return response.data;
+  } catch (error) {
+    throw new Error('Upload failed');
   }
 };

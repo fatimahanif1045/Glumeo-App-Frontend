@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'; // For login/signup screens
 import Ionicons from 'react-native-vector-icons/Ionicons'; // To use icons
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
@@ -11,8 +12,7 @@ import HomeScreen from './screens/HomeScreen';
 import SearchScreen from './screens/SearchScreen';
 import UploadContent from './screens/UploadContent';
 import ProfileScreen from './screens/ProfileScreen';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import EditProfileScreen from './screens/EditProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -24,23 +24,28 @@ const App = () => {
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('token');
-      if (token) {
-        setIsAuthenticated(true);  
-      } else {
-        setIsAuthenticated(false); 
-      }
+      setIsAuthenticated(token ? true : false); // setIsAuthenticated(!!token);
     };
-
     checkAuth();
   }, []);
 
   // Stack Navigator for Login/Signup
   const AuthStack = () => (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login">
         {(props) => <LoginScreen {...props} setIsAuthenticated={setIsAuthenticated} />}
       </Stack.Screen>
       <Stack.Screen name="Signup" component={SignupScreen} />
+    </Stack.Navigator>
+  );
+
+   // Stack Navigator for Profile & Edit Profile screens
+   const ProfileStack = () => (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Profile">
+        {(props) => <ProfileScreen {...props} setIsAuthenticated={setIsAuthenticated} />}
+      </Stack.Screen>
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
     </Stack.Navigator>
   );
 
@@ -50,7 +55,8 @@ const App = () => {
       initialRouteName="Home"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-      let iconName: string = ''; // Ensure it is a string by default
+          let iconName: string = ''; // Ensure it is a string by default
+          
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Search') {
@@ -67,16 +73,13 @@ const App = () => {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen name="Home">
-        {(props) => <HomeScreen {...props} setIsAuthenticated={setIsAuthenticated} />}
-        
-      </Tab.Screen>
+      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Upload" component={UploadContent} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Profile"  component={ProfileStack} />
     </Tab.Navigator>
   );
-      
+
   return (
     <NavigationContainer>
       {/* If authenticated, show Main Tab. Otherwise, show Auth Stack */}

@@ -1,31 +1,53 @@
 // services/user.js
 import axios from 'axios';
+import { getToken } from './auth';  
 
-const apiUrl = 'http://localhost:5000/api/users';
+const API_URL = 'http://10.0.2.2:8000/api/user';
 
-export const fetchUserProfile = async (userId) => {
+export const fetchUserDetails = async (userId) => {
   try {
-    const response = await axios.get(`${apiUrl}/${userId}`);
-    return response.data;
+        const token = await getToken();
+
+        const response = await axios.get(`${API_URL}/current-user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });        
+        return response.data.data.user; 
   } catch (error) {
-    throw new Error('Failed to fetch profile');
+    console.error('Error: ', error);
+    console.error('Error fetching videos: ', error.response ? error.response.data : error.message);
+    throw error;  }
+};
+
+export const deleteUser = async () => {
+  const token = await getToken();  // Get the token from AsyncStorage
+
+  try {
+    const response = await axios.delete(`${API_URL}/delete-user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,  
+      },
+    });
+
+    return response.data; 
+  } catch (error) {
+    console.error('Error deleting user:', error);
   }
 };
 
-export const searchUsers = async (query) => {
-  try {
-    const response = await axios.get(`${apiUrl}/search`, { params: { query } });
-    return response.data;
-  } catch (error) {
-    throw new Error('Search failed');
-  }
-};
+export const updateUserDetails = async (updateProfile) => {
+  const token = await getToken();  // Get the token from AsyncStorage
 
-export const uploadContent = async (data) => {
   try {
-    const response = await axios.post(`${apiUrl}/upload`, data);
-    return response.data;
+    const response = await axios.put(`${API_URL}/updateUser`, updateProfile , {
+      headers: {
+        Authorization: `Bearer ${token}`,  
+      },
+    });
+
+    return response.data; 
   } catch (error) {
-    throw new Error('Upload failed');
+    console.error('Error updating user data:', error);
   }
 };
