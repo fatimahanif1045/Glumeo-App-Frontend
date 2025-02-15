@@ -13,6 +13,8 @@ import SearchScreen from './screens/SearchScreen';
 import UploadContent from './screens/UploadContent';
 import ProfileScreen from './screens/ProfileScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
+import StatusBarComp from './components/StatusBarComp';
+import { View } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();

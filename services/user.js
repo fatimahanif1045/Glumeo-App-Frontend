@@ -21,7 +21,7 @@ export const fetchUserDetails = async (userId) => {
 };
 
 export const deleteUser = async () => {
-  const token = await getToken();  // Get the token from AsyncStorage
+  const token = await getToken();  
 
   try {
     const response = await axios.delete(`${API_URL}/delete-user`, {
@@ -37,8 +37,8 @@ export const deleteUser = async () => {
 };
 
 export const updateUserDetails = async (updateProfile) => {
-  const token = await getToken();  // Get the token from AsyncStorage
-
+  const token = await getToken(); 
+console.log('updateProfile',updateProfile)
   try {
     const response = await axios.put(`${API_URL}/updateUser`, updateProfile , {
       headers: {
@@ -46,6 +46,7 @@ export const updateUserDetails = async (updateProfile) => {
       },
     });
 
+    console.log('response.data',response.data)
     return response.data; 
   } catch (error) {
     console.error('Error updating user data:', error);

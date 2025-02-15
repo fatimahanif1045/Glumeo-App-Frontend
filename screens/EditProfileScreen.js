@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';
 import { fetchUserDetails, updateUserDetails } from '../services/user';
 
 const EditProfileScreen = ({ navigation }) => {
+    const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
     name: '',
     userName: '',
@@ -16,6 +17,7 @@ const EditProfileScreen = ({ navigation }) => {
   useEffect(() => {
     const loadUserDetails = async () => {
       try {
+        setLoading(true);
         const data = await fetchUserDetails();
         setUser({
           name: data.name || '',
@@ -24,7 +26,9 @@ const EditProfileScreen = ({ navigation }) => {
           about: data.about || '',
           gender: data.gender || '',
         });
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         console.error('Error fetching user details:', error);
       }
     };
@@ -32,8 +36,17 @@ const EditProfileScreen = ({ navigation }) => {
     loadUserDetails();
   }, []);
 
+  if (loading) {
+      return (
+        <View style={styles.Activitycontainer}>
+          <ActivityIndicator size={100} color='pink' animating={true} />
+        </View>
+      );
+    }
+  
   const handleUpdateProfile = async () => {
     try {
+      console.log('useruseruser', user)
       const response = await updateUserDetails(user);
       if (response.success) {
         Alert.alert("Success", "Profile updated successfully!");
@@ -43,7 +56,6 @@ const EditProfileScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      Alert.alert("Error", "Something went wrong.");
     }
   };
 
@@ -57,6 +69,15 @@ const EditProfileScreen = ({ navigation }) => {
         <Text style={styles.header}>Edit Profile</Text>
 
         <Image source={{ uri: user.profilePicture }} style={styles.profilePic} />
+
+
+        <Text style={styles.label}>Profile Picture URL</Text>
+        <TextInput
+          style={styles.input}
+          value={user.profilePicture}
+          onChangeText={(text) => setUser({ ...user, profilePicture: text })}
+          placeholder="Enter image URL"
+        />
 
         <Text style={styles.label}>Full Name</Text>
         <TextInput
@@ -72,14 +93,6 @@ const EditProfileScreen = ({ navigation }) => {
           value={user.userName}
           onChangeText={(text) => setUser({ ...user, userName: text })}
           placeholder="Enter your username"
-        />
-
-        <Text style={styles.label}>Profile Picture URL</Text>
-        <TextInput
-          style={styles.input}
-          value={user.profilePicture}
-          onChangeText={(text) => setUser({ ...user, profilePicture: text })}
-          placeholder="Enter image URL"
         />
 
         <Text style={styles.label}>About</Text>
@@ -110,11 +123,17 @@ const EditProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
   },
+    Activitycontainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+    },
   scrollView: {
     alignItems: 'center',
     paddingVertical: 20,
+    paddingHorizontal: 20,
   },
   backButton: {
     position: 'absolute',

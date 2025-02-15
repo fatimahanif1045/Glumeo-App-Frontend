@@ -1,19 +1,87 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Button, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
+import Video from 'react-native-video'; // Import for video preview
 
 const UploadContent = () => {
-    return (
-        <LinearGradient colors={['#ff9a9e', '#fad0c4', '#fad0c4', '#fbc2eb', '#a18cd1']} >
-            <View>
-            </View>
-        </LinearGradient>
+  const [imageUri, setImageUri] = useState(null);
+  const [mediaType, setMediaType] = useState(null); // 'photo' or 'video'
+
+  const openCamera = () => {
+    launchCamera(
+      {
+        mediaType: 'mixed', // Allow both images and videos |('photo' or 'video')
+        cameraType: 'front', // 'back' or 'front'
+        quality: 0.8,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled camera picker');
+        } else if (response.errorCode) {
+          console.log('Error: ', response.errorMessage);
+        } else {
+          console.log('Captured image/video: ', response.assets);
+          setImageUri(response.assets[0].uri); // Display the captured image | (assets.fileName, assets.timestamp, assets.originalPath, assets.duration for video)
+          setMediaType(response.assets[0].type); // 'photo' or 'video'
+        }
+      }
     );
+  };
+
+  const openGallery = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'mixed', // can be 'mixed', 'photo' or 'video'
+        quality: 0.8,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled gallery picker');
+        } else if (response.errorCode) {
+          console.log('Error: ', response.errorMessage);
+        } else {
+          console.log('Selected image/video: ', response.assets);
+          setImageUri(response.assets[0].uri); // Display the selected image 
+          setMediaType(response.assets[0].type); // 'photo' or 'video'
+        }
+      }
+    );
+  };
+
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Button title="Open Camera" onPress={openCamera} />
+      <Button title="Open Gallery" onPress={openGallery} />
+      {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200, marginTop: 20 }} />}
+
+{/* If it's a video, display it */}
+{mediaType === 'video' && mediaUri && (
+        <Video
+          source={{ uri: mediaUri }}
+          style={{ width: 300, height: 300, marginTop: 20 }}
+          controls={true}
+          resizeMode="cover"
+        />
+      )}
+    </View>
+  );
 };
 
-
 export default UploadContent
+//npm install react-native-video
+
+
+const app = () => {
+  return (
+    <LinearGradient colors={['#ff9a9e', '#fad0c4', '#fad0c4', '#fbc2eb', '#a18cd1']} >
+      <View>
+      </View>
+    </LinearGradient>
+  );
+};
 
 /*
 const formData = new FormData();
@@ -88,7 +156,7 @@ export default function App() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Upload Media</Text>
             <Button title="Select Media" onPress={openImagePicker} />
-            
+
             {/* If it's an image }
             {mediaType === 'photo' && mediaUri && (
               <Image source={{ uri: mediaUri }} style={styles.previewImage} />

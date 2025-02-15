@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';
 import { logout } from '../services/auth';  // Import logout function
@@ -9,7 +9,6 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(false);
 
-
   useEffect(() => {
     // Fetch User when the component mounts
     const fetchUser = async () => {
@@ -17,7 +16,6 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
         setLoading(true);
         const data = await fetchUserDetails();
         console.log('Fetched User Details:', data);
-        console.warn(data);
         setUserDetails(data);
         setLoading(false);
       } catch (error) {
@@ -32,12 +30,12 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
   if (loading) {
     return (
       <View style={styles.container}>
-        <Text>Loading Details...</Text>
+        <ActivityIndicator size={100} color='pink' animating={true} />
       </View>
     );
   }
 
-  const profilePic= userDetails.profilePicture // Replace with real image URL
+  const profilePic = userDetails.profilePicture // Replace with real image URL
 
   const handleEditProfile = () => {
     navigation.navigate('EditProfile');
@@ -95,11 +93,11 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
       <View style={styles.profileContainer}>
         <Image source={{ uri: profilePic }} style={styles.profilePic} />
         <Text style={styles.fullName}>{userDetails.name}</Text>
-        <Text style={styles.username}>@{userDetails.username}</Text>
+        <Text style={styles.username}>@{userDetails.userName}</Text>
         <Text style={styles.username}>{userDetails.about}</Text>
         <View style={styles.statsContainer}>
-          <Text style={styles.statsText}>Likes: {userDetails.totalLikes}</Text>
-          <Text style={styles.statsText}>Videos: {userDetails.totalVideos}</Text>
+          <Text style={styles.statsText}>Likes: {userDetails.likes}</Text>
+          <Text style={styles.statsText}>Videos: {userDetails.videos}</Text>
         </View>
 
         <Text style={styles.gender}>Gender   {userDetails.gender}</Text>
