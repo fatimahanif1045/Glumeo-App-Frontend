@@ -3,6 +3,7 @@ import { getVideos } from '../services/videoService';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, FlatList , Button, Alert } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { ip_Address } from '../services/user';
 
 const HomeScreen = () => {
   const [videos, setVideos] = useState([]);
@@ -41,10 +42,10 @@ const HomeScreen = () => {
   const renderVideoItem = ({ item }) => (
     <View style={styles.videoCard}>
       <Image
-        source={{ uri: `http://10.0.2.2:8000/uploads/thumbnails/${item.thumbnailName}` }} // Assuming the thumbnail is served from your backend
+        source={{ uri: `${ip_Address}/uploads/thumbnails/${item.thumbnailName}` }} // Assuming the thumbnail is served from your backend
         style={styles.thumbnail}
       />
-      {console.log(`http://10.0.2.2:8000/uploads/thumbnail/${item.thumbnailName}`)}
+      {console.log(`${ip_Address}/uploads/thumbnail/${item.thumbnailName}`)}
 
       <Text style={styles.videoName}>{item.videoName}</Text>
     </View>

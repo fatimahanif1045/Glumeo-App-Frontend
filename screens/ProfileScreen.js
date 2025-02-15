@@ -3,11 +3,13 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicat
 import Feather from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';
 import { logout } from '../services/auth';  // Import logout function
-import { fetchUserDetails, deleteUser } from '../services/user';
+import { fetchUserDetails, deleteUser, ip_Address } from '../services/user';
 
 const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(false);
+
+ const imgUrl= `${ip_Address}${userDetails.profilePicture}` //confirm ip address using ipconfig
 
   useEffect(() => {
     // Fetch User when the component mounts
@@ -34,8 +36,6 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
       </View>
     );
   }
-
-  const profilePic = userDetails.profilePicture // Replace with real image URL
 
   const handleEditProfile = () => {
     navigation.navigate('EditProfile');
@@ -84,14 +84,15 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
       Alert.alert('Logout Failed', 'An error occurred while logging out.');
     }
   };
-
   return (
     <LinearGradient colors={["#ff9a9e", "#fad0c4", "#a18cd1", "#fbc2eb"]} style={styles.container}>
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Feather name="log-out" size={24} color="white" />
       </TouchableOpacity>
       <View style={styles.profileContainer}>
-        <Image source={{ uri: profilePic }} style={styles.profilePic} />
+
+        <Image source={{ uri: imgUrl }} style={styles.profilePic} />
+
         <Text style={styles.fullName}>{userDetails.name}</Text>
         <Text style={styles.username}>@{userDetails.userName}</Text>
         <Text style={styles.username}>{userDetails.about}</Text>

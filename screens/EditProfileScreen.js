@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';
-import { fetchUserDetails, updateUserDetails } from '../services/user';
+import { fetchUserDetails, updateUserDetails, ip_Address } from '../services/user';
 
 const EditProfileScreen = ({ navigation }) => {
     const [loading, setLoading] = useState(false);
@@ -14,6 +14,8 @@ const EditProfileScreen = ({ navigation }) => {
     gender: '',
   });
 
+  const imgUrl= `${ip_Address}${user.profilePicture}` //confirm ip address using ipconfig
+
   useEffect(() => {
     const loadUserDetails = async () => {
       try {
@@ -22,7 +24,7 @@ const EditProfileScreen = ({ navigation }) => {
         setUser({
           name: data.name || '',
           userName: data.userName || '',
-          profilePicture: data.profilePicture || 'https://via.placeholder.com/150',
+          profilePicture: data.profilePicture || imgUrl,
           about: data.about || '',
           gender: data.gender || '',
         });
@@ -68,16 +70,7 @@ const EditProfileScreen = ({ navigation }) => {
 
         <Text style={styles.header}>Edit Profile</Text>
 
-        <Image source={{ uri: user.profilePicture }} style={styles.profilePic} />
-
-
-        <Text style={styles.label}>Profile Picture URL</Text>
-        <TextInput
-          style={styles.input}
-          value={user.profilePicture}
-          onChangeText={(text) => setUser({ ...user, profilePicture: text })}
-          placeholder="Enter image URL"
-        />
+        <Image source={{ uri: imgUrl }} style={styles.profilePic} />
 
         <Text style={styles.label}>Full Name</Text>
         <TextInput

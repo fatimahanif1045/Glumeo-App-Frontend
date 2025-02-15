@@ -54,6 +54,13 @@ const UploadContent = () => {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Button title="Open Camera" onPress={openCamera} />
+      <Video
+        source={require('../Paper butterfly.mp4')}  // Image from the 'assets' folder
+        style={{
+          width: 200,
+          height: 200,  // Adjust size as needed
+        }}
+      />
       <Button title="Open Gallery" onPress={openGallery} />
       {imageUri && <Image source={{ uri: imageUri }} style={{ width: 200, height: 200, marginTop: 20 }} />}
 
@@ -71,17 +78,6 @@ const UploadContent = () => {
 };
 
 export default UploadContent
-//npm install react-native-video
-
-
-const app = () => {
-  return (
-    <LinearGradient colors={['#ff9a9e', '#fad0c4', '#fad0c4', '#fbc2eb', '#a18cd1']} >
-      <View>
-      </View>
-    </LinearGradient>
-  );
-};
 
 /*
 const formData = new FormData();
@@ -104,7 +100,6 @@ axios.post('https://api.glumeo.com/upload', formData, {
 
 
 
-//npm install react-native-image-picker
 
 /*
 
