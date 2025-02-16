@@ -4,86 +4,62 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   FlatList,
   ActivityIndicator,
   Alert,
-  Animated,
+  StyleSheet,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Feather from 'react-native-vector-icons/Feather';
-
-// Simulated data for search results
-const sampleData = [
-  { id: '1', title: 'The beauty of nature', description: 'A deep dive into the beauty of nature', tags: ['nature', 'beauty'] },
-  { id: '2', title: 'Tech trends 2025', description: 'Exploring the technology trends for the coming years', tags: ['tech', '2025', 'trends'] },
-  { id: '3', title: 'Yoga for beginners', description: 'A guide to starting yoga for new practitioners', tags: ['yoga', 'beginners'] },
-  // Add more sample data...
-];
+import { searchVideo } from '../services/video';
 
 const SearchScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredData, setFilteredData] = useState([]);
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [noResults, setNoResults] = useState(false);
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-  
-  const debouncedSearch = useDebounce(searchQuery, 500); // Implementing debouncing
+  const [limit, setLimit] = useState(5);
+  const [sortBy, setSortBy] = useState('date');
+  const [totalPages, setTotalPages] = useState(1);
 
-  const handleButtonPress = async () => {
+  const fetchResults = async (searchTerm = searchQuery, newPage = page) => {
+    if (searchTerm.trim().length === 0) {
+      Alert.alert('Error', 'Please enter a search query.');
+      return;
+    }
+
     setLoading(true);
-    setError(null);
     try {
-      const response = await searchVideo(); // Replace with your URL
-      // Check if the response is OK
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      setData(response);
-    } catch (err) {
-      // Log error and display it to the user
-      console.error('Error fetching data:', err);
-      setError(err.message);
-      Alert.alert('Error', `There was an issue fetching the data: ${err.message}`);
+      const response = await searchVideo(searchTerm, newPage, limit, sortBy);
+      setResults(response.data.videos || []);
+      setTotalPages(response.data.pagination.totalPages || 1);
+    } catch (error) {
+      console.error('Fetch Error:', error);
+      Alert.alert("No video found matching the search");
     } finally {
-      setLoading(false); // Always set loading to false after fetching
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (debouncedSearch.length >= 3) {
-      fetchSearchResults(debouncedSearch, page);
-    }
-  }, [debouncedSearch, page]);
-
-  const fetchSearchResults = (query, pageNum) => {
-    setLoading(true);
-    setNoResults(false);
-
-    // Simulate API call and filter data
-    const filtered = sampleData.filter(
-      (item) =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.description.toLowerCase().includes(query.toLowerCase()) ||
-        item.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
-    );
-
-    if (filtered.length === 0) {
-      setNoResults(true);
-    } else {
-      setFilteredData(filtered.slice(0, pageNum * 5)); // Pagination logic (5 items per page)
-    }
-    setLoading(false);
+  const handleSearch = () => {
+    setPage(1); // Reset to first page on new search
+    fetchResults(searchQuery, 1);
   };
 
-  const handleLoadMore = () => {
-    setPage((prevPage) => prevPage + 1); // Load more results when user scrolls
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      const newPage = page + 1;
+      setPage(newPage);
+      fetchResults(searchQuery, newPage);
+    }
   };
-  const handleSearchInput = (text) => {
-    setSearchQuery(text);
-    setNoResults(false); // Reset no results message when the user types
+
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      const newPage = page - 1;
+      setPage(newPage);
+      fetchResults(searchQuery, newPage);
+    }
   };
 
   return (
@@ -93,59 +69,61 @@ const SearchScreen = () => {
           style={styles.searchBar}
           placeholder="Search by title, description, or tags"
           value={searchQuery}
-          onChangeText={handleSearchInput}
+          onChangeText={setSearchQuery}
           placeholderTextColor="black"
         />
-        <Feather name="search" size={20} color="tomato" style={styles.searchIcon} />
+        <TouchableOpacity onPress={handleSearch}>
+          <Feather name="search" size={20} color="tomato" style={styles.searchIcon} />
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.optionsContainer}>
+        <TouchableOpacity style={styles.optionButton} onPress={() => setSortBy('date')}>
+          <Text style={styles.optionText}>Sort: Date</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.optionButton} onPress={() => setLimit(3)}>
+          <Text style={styles.optionText}>Limit: 3</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.optionButton} onPress={() => setLimit(5)}>
+          <Text style={styles.optionText}>Limit: 5</Text>
+        </TouchableOpacity>
       </View>
 
       {loading ? (
-        <ActivityIndicator size="100" color="pink" />
+        <ActivityIndicator size="large" color="pink" />
       ) : (
-        <>
-          {noResults ? (
-            <View style={styles.noResultsContainer}>
-              <Text style={styles.noResultsText}>No results found</Text>
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Text style={styles.modifySearch}>Try modifying your search</Text>
-              </TouchableOpacity>
+        <FlatList
+          data={results}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <View style={styles.resultItem}>
+              <Text style={styles.resultTitle}>{item.title}</Text>
+              <Text style={styles.resultDescription}>{item.description}</Text>
+              <Text style={styles.resultTags}>{item.tag.join(', ')}</Text>
             </View>
-          ) : (
-            <FlatList
-              data={filteredData}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <View style={styles.resultItem}>
-                  <Text style={styles.resultTitle}>{item.title}</Text>
-                  <Text style={styles.resultDescription}>{item.description}</Text>
-                  <Text style={styles.resultTags}>{item.tags.join(', ')}</Text>
-                </View>
-              )}
-              onEndReached={handleLoadMore}
-              onEndReachedThreshold={0.5}
-            />
           )}
-        </>
+        />
       )}
+
+      <View style={styles.paginationContainer}>
+        <TouchableOpacity
+          style={styles.pageButton}
+          disabled={page === 1}
+          onPress={handlePreviousPage}>
+          <Text style={styles.optionText}>Previous</Text>
+        </TouchableOpacity>
+        <Text style={styles.pageNumber}>{page} / {totalPages}</Text>
+        <TouchableOpacity
+          style={styles.pageButton}
+          disabled={page === totalPages}
+          onPress={handleNextPage}>
+          <Text style={styles.optionText}>Next</Text>
+        </TouchableOpacity>
+      </View>
     </LinearGradient>
   );
 };
 
-  // Custom hook for debouncing
-  function useDebounce(value, delay) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-    useEffect(() => {
-      const handler = setTimeout(() => {
-        setDebouncedValue(value);
-      }, delay);
-      return () => {
-        clearTimeout(handler);
-      };
-    }, [value, delay]);
-  
-    return debouncedValue;
-  }
-  
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -157,12 +135,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 10,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    marginBottom: 15,
   },
   searchBar: {
     flex: 1,
@@ -171,44 +144,33 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: '#f0f0f0',
     marginRight: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
   },
   searchIcon: {
     padding: 5,
   },
-  noResultsContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
+  optionsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
   },
-  noResultsText: {
-    fontSize: 18,
-    color: 'gray',
+  optionButton: {
+    backgroundColor: '#ff5a5f',
+    padding: 10,
+    borderRadius: 10,
   },
-  modifySearch: {
-    fontSize: 16,
-    color: '#ff5a5f',
-    marginTop: 10,
+  optionText: {
+    color: 'white',
+    fontSize: 14,
   },
   resultItem: {
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 15,
-    
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
+    marginBottom: 10,
   },
   resultTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
   },
   resultDescription: {
     fontSize: 14,
@@ -218,7 +180,22 @@ const styles = StyleSheet.create({
   resultTags: {
     fontSize: 12,
     color: '#888',
-    marginTop: 10,
+    marginTop: 5,
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  pageButton: {
+    backgroundColor: '#ff5a5f',
+    padding: 10,
+    borderRadius: 10,
+  },
+  pageNumber: {
+    fontSize: 16,
+    color: 'black',
   },
 });
+
 export default SearchScreen;

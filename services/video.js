@@ -22,16 +22,16 @@ export const uploadVideo = async (formData) => {
   }
 };
 
-export const searchVideo = async (query, page = 1, limit = 4) => {
+export const searchVideo = async (query, page = 1, limit = 4, sortBy = 'date') => {
+  console.log ('query, page, limit, sortBy ',query, page, limit, sortBy )
+
   try {
     const token = await getToken();
-
-    const response = await axios.get(`${API_URL}/search-video`, { params: { query, page, limit } }, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const response = await axios.get(`${API_URL}/search-video`, {
+      params: { query, page, limit, sortBy },
+      headers: { Authorization: `Bearer ${token}` },
     });
-
+    console.log ('response.data ',response.data)
     return response.data;
   } catch (error) {
     throw new Error('Search failed');

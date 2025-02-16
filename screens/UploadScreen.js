@@ -153,11 +153,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    backgroundColor: '#1E1E1E',
+    backgroundColor: '#f0f0f0',
     width: '100%',
     padding: 12,
     borderRadius: 8,
-    color: 'white',
+    color: '#000',
     fontSize: 16,
     marginBottom: 15,
   },
