@@ -1,204 +1,224 @@
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, ActivityIndicator, Alert,  FlatList, StyleSheet } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+  Animated,
+} from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import Feather from 'react-native-vector-icons/Feather';
+
+// Simulated data for search results
+const sampleData = [
+  { id: '1', title: 'The beauty of nature', description: 'A deep dive into the beauty of nature', tags: ['nature', 'beauty'] },
+  { id: '2', title: 'Tech trends 2025', description: 'Exploring the technology trends for the coming years', tags: ['tech', '2025', 'trends'] },
+  { id: '3', title: 'Yoga for beginners', description: 'A guide to starting yoga for new practitioners', tags: ['yoga', 'beginners'] },
+  // Add more sample data...
+];
 
 const SearchScreen = () => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [noResults, setNoResults] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  
+  const debouncedSearch = useDebounce(searchQuery, 500); // Implementing debouncing
 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('https://api.example.com/data'); // Replace with your URL
-        // Check if the response is OK
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        // Log error and display it to the user
-        console.error('Error fetching data:', err);
-        setError(err.message);
-        Alert.alert('Error', 'There was an issue fetching the data.');
-      } finally {
-        setLoading(false); // Always set loading to false after fetching
+  const handleButtonPress = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await searchVideo(); // Replace with your URL
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-    };
 
-    fetchData();
-  }, []); // Empty dependency array to run only once when the component mounts
-
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
-
-  if (error) {
-    return <Text>Error: {error}</Text>;
-  }
-
-  return (
-    <View style={{ padding: 20 }}>
-      <Text>EditProfileScreen</Text>
-
-      <Text>Data:</Text>
-      <Text>{JSON.stringify(data, null, 2)}</Text>
-
-
-      <Button title="Fetch Data" onPress={handleButtonPress} />
-
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
-      {error && <Text style={{ color: 'red' }}>Error: {error}</Text>}
-
-      {data && (
-        <View>
-          <Text>Data:</Text>
-          <Text>{JSON.stringify(data, null, 2)}</Text>
-        </View>
-      )}
-    </View>
-  );
-};
-
-const handleButtonPress = async () => {
-  setLoading(true);  // Set loading state before starting the request
-  setError(null);    // Reset any previous errors
-  try {
-    const response = await fetch('https://api.example.com/data'); // Replace with your URL
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      setData(response);
+    } catch (err) {
+      // Log error and display it to the user
+      console.error('Error fetching data:', err);
+      setError(err.message);
+      Alert.alert('Error', `There was an issue fetching the data: ${err.message}`);
+    } finally {
+      setLoading(false); // Always set loading to false after fetching
     }
-
-    const result = await response.json();
-    setData(result);  // Update the state with the response data
-  } catch (err) {
-    console.error('Error fetching data:', err);
-    setError(err.message);  // Store the error message
-    Alert.alert('Error', `There was an issue fetching the data: ${err.message}`);
-  } finally {
-    setLoading(false);  // Set loading to false after the request completes
-  }
-};
-
-export default SearchScreen
-
-
-
-/*
-
-const DataFetchingWithAxios = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  };
 
   useEffect(() => {
-    axios.get('https://api.example.com/data')
-      .then((response) => {
-        setData(response.data);  // Set the data from API response
-        setLoading(false);  // Stop loading when data is fetched
-      })
-      .catch((err) => {
-        setError(err);  // Set error if request fails
-        setLoading(false);
-      });
-  }, []);
+    if (debouncedSearch.length >= 3) {
+      fetchSearchResults(debouncedSearch, page);
+    }
+  }, [debouncedSearch, page]);
 
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
+  const fetchSearchResults = (query, pageNum) => {
+    setLoading(true);
+    setNoResults(false);
 
-  if (error) {
-    return <Text>Error: {error.message}</Text>;
-  }
+    // Simulate API call and filter data
+    const filtered = sampleData.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.description.toLowerCase().includes(query.toLowerCase()) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(query.toLowerCase()))
+    );
+
+    if (filtered.length === 0) {
+      setNoResults(true);
+    } else {
+      setFilteredData(filtered.slice(0, pageNum * 5)); // Pagination logic (5 items per page)
+    }
+    setLoading(false);
+  };
+
+  const handleLoadMore = () => {
+    setPage((prevPage) => prevPage + 1); // Load more results when user scrolls
+  };
+  const handleSearchInput = (text) => {
+    setSearchQuery(text);
+    setNoResults(false); // Reset no results message when the user types
+  };
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text>{item.name}</Text>
-          </View>
-        )}
-      />
-    </View>
+    <LinearGradient colors={['#ff9a9e', '#fad0c4', '#a18cd1', '#fbc2eb']} style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search by title, description, or tags"
+          value={searchQuery}
+          onChangeText={handleSearchInput}
+          placeholderTextColor="black"
+        />
+        <Feather name="search" size={20} color="tomato" style={styles.searchIcon} />
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="100" color="pink" />
+      ) : (
+        <>
+          {noResults ? (
+            <View style={styles.noResultsContainer}>
+              <Text style={styles.noResultsText}>No results found</Text>
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Text style={styles.modifySearch}>Try modifying your search</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredData}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.resultItem}>
+                  <Text style={styles.resultTitle}>{item.title}</Text>
+                  <Text style={styles.resultDescription}>{item.description}</Text>
+                  <Text style={styles.resultTags}>{item.tags.join(', ')}</Text>
+                </View>
+              )}
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.5}
+            />
+          )}
+        </>
+      )}
+    </LinearGradient>
   );
 };
 
-
-const DataFetchingExample = () => {
-  const [data, setData] = useState([]);  // State to store fetched data
-  const [loading, setLoading] = useState(true);  // State to track loading
-  const [error, setError] = useState(null);  // State for any potential errors
-
-  // Fetch data using useEffect when component mounts
-  useEffect(() => {
-    fetch('https://api.example.com/data')  // Replace with your API URL
-      .then((response) => response.json())
-      .then((jsonData) => {
-        setData(jsonData);  // Set the fetched data into state
-        setLoading(false);  // Set loading to false once data is fetched
-      })
-      .catch((err) => {
-        setError(err);  // If there is an error, set error state
-        setLoading(false);  // Set loading to false
-      });
-  }, []);  // Empty dependency array means this runs only once when component mounts
-
-  if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;  // Show loading spinner while data is being fetched
+  // Custom hook for debouncing
+  function useDebounce(value, delay) {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+      const handler = setTimeout(() => {
+        setDebouncedValue(value);
+      }, delay);
+      return () => {
+        clearTimeout(handler);
+      };
+    }, [value, delay]);
+  
+    return debouncedValue;
   }
-
-  if (error) {
-    return <Text>Error: {error.message}</Text>;  // Display error if any
-  }
-
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id.toString()}  // Adjust the keyExtractor based on your data
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text>{item.name}</Text>  {/* Adjust based on the structure of your data */
- /*         </View>
-        )}
-      />
-    </View>
-  );
-};
-
+  
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
   },
-  item: {
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  searchBar: {
+    flex: 1,
+    padding: 10,
+    fontSize: 16,
+    borderRadius: 25,
+    backgroundColor: '#f0f0f0',
+    marginRight: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  searchIcon: {
+    padding: 5,
+  },
+  noResultsContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  noResultsText: {
+    fontSize: 18,
+    color: 'gray',
+  },
+  modifySearch: {
+    fontSize: 16,
+    color: '#ff5a5f',
+    marginTop: 10,
+  },
+  resultItem: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 15,
+    
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  resultTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  resultDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 5,
+  },
+  resultTags: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 10,
   },
 });
-*/
-
-/*export default SearchScreen
-import { View, Text } from 'react-native'
-import React from 'react'
-
-import axios from 'axios';
-
-const apiUrl = 'http://localhost:5000/api/search';
-
-export const SearchScreen = async (query, page = 1, limit = 10) => {
-  try {
-    const response = await axios.get(apiUrl, { params: { query, page, limit } });
-    return response.data;
-  } catch (error) {
-    throw new Error('Search failed');
-  }
-};*/
+export default SearchScreen;

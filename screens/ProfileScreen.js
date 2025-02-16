@@ -9,15 +9,13 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(false);
 
- const imgUrl= `${ip_Address}${userDetails.profilePicture}` //confirm ip address using ipconfig
-
+ const imgUrl= `${ip_Address}/uploads/profilePics/${userDetails.profilePicture}` //confirm ip address using ipconfig
   useEffect(() => {
     // Fetch User when the component mounts
     const fetchUser = async () => {
       try {
         setLoading(true);
         const data = await fetchUserDetails();
-        console.log('Fetched User Details:', data);
         setUserDetails(data);
         setLoading(false);
       } catch (error) {
@@ -27,7 +25,8 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
     };
 
     fetchUser();
-  }, []);
+
+  }, []);  // Empty dependency array to run only once when the component mounts
 
   if (loading) {
     return (
@@ -148,10 +147,9 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 100,
     marginTop: 20,
-
     marginBottom: 10,
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: 'tomato',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.2,

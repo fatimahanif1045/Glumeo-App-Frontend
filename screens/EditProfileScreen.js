@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'; 
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
 import LinearGradient from 'react-native-linear-gradient';
 import { fetchUserDetails, updateUserDetails, ip_Address } from '../services/user';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const EditProfileScreen = ({ navigation }) => {
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState({
     name: '',
     userName: '',
@@ -14,7 +15,7 @@ const EditProfileScreen = ({ navigation }) => {
     gender: '',
   });
 
-  const imgUrl= `${ip_Address}${user.profilePicture}` //confirm ip address using ipconfig
+  const imgUrl = `${ip_Address}/uploads/profilePics/${user.profilePicture}`;
 
   useEffect(() => {
     const loadUserDetails = async () => {
@@ -39,19 +40,18 @@ const EditProfileScreen = ({ navigation }) => {
   }, []);
 
   if (loading) {
-      return (
-        <View style={styles.Activitycontainer}>
-          <ActivityIndicator size={100} color='pink' animating={true} />
-        </View>
-      );
-    }
-  
+    return (
+      <View style={styles.Activitycontainer}>
+        <ActivityIndicator size={100} color="pink" animating={true} />
+      </View>
+    );
+  }
+
   const handleUpdateProfile = async () => {
     try {
-      console.log('useruseruser', user)
       const response = await updateUserDetails(user);
       if (response.success) {
-        Alert.alert("Success", "Profile updated successfully!");
+        console.log("Success", "Profile updated successfully!");
         navigation.goBack();
       } else {
         Alert.alert("Error", "Failed to update profile.");
@@ -59,6 +59,29 @@ const EditProfileScreen = ({ navigation }) => {
     } catch (error) {
       console.error('Error updating profile:', error);
     }
+  };
+
+  const handleChangeProfilePicture = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        quality: 0.5,
+        includeBase64: true,
+      },
+      (response) => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.errorMessage) {
+          console.error('Error picking image: ', response.errorMessage);
+        } else {
+          const source = response.assets[0].uri;
+          setUser({
+            ...user,
+            profilePicture: source, // Update profile picture URI
+          });
+        }
+      }
+    );
   };
 
   return (
@@ -70,7 +93,13 @@ const EditProfileScreen = ({ navigation }) => {
 
         <Text style={styles.header}>Edit Profile</Text>
 
-        <Image source={{ uri: imgUrl }} style={styles.profilePic} />
+        <TouchableOpacity onPress={handleChangeProfilePicture}>
+          <Image
+            source={{ uri: imgUrl }}
+            style={styles.profilePic}
+          />
+          <Feather name="camera" size={30} color="white" style={styles.cameraIcon} />
+        </TouchableOpacity>
 
         <Text style={styles.label}>Full Name</Text>
         <TextInput
@@ -117,12 +146,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-    Activitycontainer: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 20,
-    },
+  Activitycontainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
   scrollView: {
     alignItems: 'center',
     paddingVertical: 20,
@@ -141,12 +170,20 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   profilePic: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 150,
+    height: 150,
+    borderRadius: 100,
     marginBottom: 20,
     borderWidth: 3,
-    borderColor: '#fff',
+    borderColor: 'tomato',
+  },
+  cameraIcon: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 5,
+    borderRadius: 50,
   },
   label: {
     alignSelf: 'flex-start',

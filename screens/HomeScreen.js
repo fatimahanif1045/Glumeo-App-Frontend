@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getVideos } from '../services/videoService';
+import { getVideos } from '../services/video';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, FlatList , Button, Alert } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';

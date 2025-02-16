@@ -10,7 +10,7 @@ import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import HomeScreen from './screens/HomeScreen';
 import SearchScreen from './screens/SearchScreen';
-import UploadContent from './screens/UploadContent';
+import UploadScreen from './screens/UploadScreen';
 import ProfileScreen from './screens/ProfileScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
 import StatusBarComp from './components/StatusBarComp';
@@ -41,8 +41,8 @@ const App = () => {
     </Stack.Navigator>
   );
 
-   // Stack Navigator for Profile & Edit Profile screens
-   const ProfileStack = () => (
+  // Stack Navigator for Profile & Edit Profile screens
+  const ProfileStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Profile">
         {(props) => <ProfileScreen {...props} setIsAuthenticated={setIsAuthenticated} />}
@@ -58,7 +58,7 @@ const App = () => {
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: string = ''; // Ensure it is a string by default
-          
+
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Search') {
@@ -77,8 +77,10 @@ const App = () => {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Upload" component={UploadContent} />
-      <Tab.Screen name="Profile"  component={ProfileStack} />
+      <Tab.Screen name="Upload" component={UploadScreen} />
+      <Tab.Screen name="Profile">
+        {() => <ProfileStack />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 

@@ -3,7 +3,6 @@ import axios from 'axios';
 import { getToken } from './auth';  
 
 const API_URL = 'http://10.0.2.2:8000/api/user';
-
 export const ip_Address = `http://192.168.10.35:8000`;
 
 export const fetchUserDetails = async (userId) => {
@@ -42,7 +41,7 @@ export const updateUserDetails = async (updateProfile) => {
   const token = await getToken(); 
 console.log('updateProfile',updateProfile)
   try {
-    const response = await axios.put(`${API_URL}/updateUser`, updateProfile , {
+    const response = await axios.put(`${API_URL}/update-user`, updateProfile , {
       headers: {
         Authorization: `Bearer ${token}`,  
       },
