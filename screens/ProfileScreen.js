@@ -9,7 +9,7 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
   const [userDetails, setUserDetails] = useState({});
   const [loading, setLoading] = useState(false);
 
- const imgUrl= `${ip_Address}/uploads/profilePics/${userDetails.profilePicture}` //confirm ip address using ipconfig
+  const imgUrl = `${ip_Address}/uploads/profilePics/${userDetails.profilePicture}` //confirm ip address using ipconfig
   useEffect(() => {
     // Fetch User when the component mounts
     const fetchUser = async () => {
@@ -113,6 +113,9 @@ const ProfileScreen = ({ navigation, setIsAuthenticated }) => {
           </TouchableOpacity>
         </View>
       </View>
+     { /*<TouchableOpacity style={styles.fab}>
+        <MaterialIcons name="add" size={30} color="#fff" />
+      </TouchableOpacity>*/}
     </LinearGradient>
   );
 };
@@ -220,6 +223,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center'
   },
+  /*
+  fab: {
+    position: 'absolute',
+    bottom: 60,
+    right: 20,
+    backgroundColor: 'tomato',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4, // Shadow for Android
+  },*/
 });
 
 export default ProfileScreen;

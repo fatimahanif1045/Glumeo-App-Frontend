@@ -12,7 +12,7 @@ const StatusBarComp = () => {
         barStyle={barStyle}
         />
       <Button title='Toggle Status Bar' onPress={()=>setHide(!hide)}/>
-      <Button title='Update Style' onPress={()=>setBarStyle('dark-content')}/>
+      <Button title='Update Style' onPress={()=>setBarStyle('light-content')}/>
     </View>
   )
 }
