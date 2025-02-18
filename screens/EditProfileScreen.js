@@ -94,10 +94,11 @@ const EditProfileScreen = ({ navigation }) => {
         <Text style={styles.header}>Edit Profile</Text>
 
         <TouchableOpacity onPress={handleChangeProfilePicture}>
+          <View style={[styles.profilePic, {backgroundColor: 'tomato'}]}>
           <Image
             source={{ uri: imgUrl }}
             style={styles.profilePic}
-          />
+          /></View>
           <Feather name="camera" size={30} color="white" style={styles.cameraIcon} />
         </TouchableOpacity>
 
@@ -174,12 +175,12 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 100,
     marginBottom: 20,
-    borderWidth: 3,
+    borderWidth: 5,
     borderColor: 'tomato',
   },
   cameraIcon: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 20,
     right: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     padding: 5,
